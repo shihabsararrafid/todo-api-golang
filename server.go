@@ -13,11 +13,11 @@ import (
 )
 
 type TodoServer struct {
-	store *storage.MemoryStore
+	store storage.Store
 	http.Handler
 }
 
-func NewTodoServer(store *storage.MemoryStore) *TodoServer {
+func NewTodoServer(store storage.Store) *TodoServer {
 
 	p := new(TodoServer)
 	p.store = store
@@ -64,6 +64,8 @@ func (t *TodoServer) todoHandler(w http.ResponseWriter, r *http.Request) {
 			utils.WriteError(w, http.StatusNotImplemented, "Method not allowed")
 
 		}
+	default:
+		utils.WriteError(w, http.StatusNotImplemented, "Method not allowed")
 
 	}
 
@@ -74,12 +76,17 @@ func (t *TodoServer) createTodo(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("Invalid Json", w, http.StatusBadRequest)
 		return
 	}
-	todo := t.store.Create(req)
+	todo, err := t.store.Create(req)
+	if err != nil {
+		log.Printf("Error creating todo: %v", err)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create todo")
+		return
+	}
 	utils.WriteJson(w, http.StatusCreated, todo)
 }
 
 func (t *TodoServer) GetTodos(w http.ResponseWriter, r *http.Request) {
-	todos := t.store.GetAll()
+	todos, _ := t.store.GetAll()
 	utils.WriteJson(w, http.StatusOK, todos)
 }
 func (t *TodoServer) GetSingleTodo(w http.ResponseWriter, r *http.Request, id int) {
