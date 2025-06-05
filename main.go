@@ -3,10 +3,26 @@ package main
 import (
 	"log"
 	"net/http"
+	"todo-api/databases"
 	"todo-api/storage"
 )
 
 func main() {
+	dbConfig := databases.Config{
+		Host:     "localhost",
+		Port:     5434,
+		User:     "postgres",
+		Password: "example",
+		DBName:   "todo-db",
+		SSlMode:  "disable", // Use "require" in production
+	}
+
+	// Connect to database
+	db, err := databases.NewDBConnection(dbConfig)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer db.Close()
 
 	store := storage.NewMemoryStore()
 
