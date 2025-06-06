@@ -16,7 +16,7 @@ func main() {
 		DBName:   "todo-db",
 		SSlMode:  "disable", // Use "require" in production
 	}
-	// migrationsPath := "./migrations"
+	migrationsPath := "./migrations"
 
 	// Connect to database
 	db, err := databases.NewDBConnection(dbConfig)
@@ -24,9 +24,9 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
-	// if err := databases.RunMigrations(db, migrationsPath); err != nil {
-	// 	log.Fatalf("Failed to run migrations: %v", err)
-	// }
+	if err := databases.RunMigrations(db, migrationsPath); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
 
 	store := storage.NewPostgresStore(db)
 
